@@ -1,0 +1,130 @@
+<!--if its not the 2025-2026 school year and the program is reporting the a/b day wrong, edit lines 89 to 91 in the script tag-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>school day overview</title>
+    <meta charset="utf-8">
+    <style>
+      body {
+        background-color: #333;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+      .title {
+        font-size: 50px;
+      }
+      .version {
+        font-size: 10px;
+      }
+      h1 {
+        color: #eee;
+        font-size: 40px;
+      }
+      h2 {
+        font-size: 25px;
+      }
+      p {
+        font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="title">school day overview</h1>
+    <h1>date</h1>
+    <p id="date">loading...</p>
+    <p id="dayLetter">loading...</p>
+    <h1>meals</h1>
+    <h2>breakfast</h2>
+    <p id="breakfast">loading...</p>
+    <h2>lunch</h2>
+    <p id="lunch">loading...</p>
+    
+    <script type="module">
+      async function main() {
+        const today = new Date();
+        const date = today.toDateString();
+        document.getElementById("date").innerHTML = date.toLowerCase();
+
+        const apiLinkWithPlaceholders = "https://api.mealviewer.com/api/v4/school/O%27CallaghanMikeMSi3LearnAcademy/!d/!d";
+        const options = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        };
+        const formattedDate = today.toISOString().split('T')[0]
+        const apiLink = apiLinkWithPlaceholders.replace(/!d/g, formattedDate);
+
+        try {
+          const response = await fetch(apiLink);
+          if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+          }
+
+          const jsonData = await response.text();
+          const jsonObj = JSON.parse(jsonData);
+
+          let breakfastJson = jsonObj.menuSchedules[0].menuBlocks[0];
+          let lunchJson = jsonObj.menuSchedules[0].menuBlocks[1];
+
+          function getAllValues(obj, key) {
+            let values = [];
+            function recurse(o) {
+              if (Array.isArray(o)) {
+                for (const item of o) recurse(item);
+              } else if (typeof o === 'object' && o !== null) {
+                for (const k in o) {
+                  if (k === key) values.push(o[k]);
+                  recurse(o[k]);
+                }
+              }
+            }
+            recurse(obj);
+            return values;
+          }
+
+          let breakfast = getAllValues(breakfastJson, "item_Name").join('<br>');
+          let lunch = getAllValues(lunchJson, "item_Name").join('<br>');
+
+          console.log(jsonData)
+          
+          document.getElementById("breakfast").innerHTML = breakfast.toLowerCase();
+          document.getElementById("lunch").innerHTML = lunch.toLowerCase();
+          
+          let schoolDaysOff = "09-01-2025, 09-15-2025, 10-17-2025, 10-31-2025, 11-11-2025, 11-26-2025, 11-27-2025, 11-28-2025, 12-22-2025, 12-23-2025, 12-24-2025, 12-25-2025, 12-26-2025, 12-29-2025, 12-30-2025, 12-31-2025, 1-1-2026,1-2-2026, 1-19-2026, 1-26-2026, 02-09-2026, 02-16-2026, 03-16-2026,03-17-2026, 03-18-2026, 03-19-2026, 03-20-2026, 04-03-2026, 04-06-2026";
+          const schoolYearStart = new Date("2025-08-11");
+          const schoolYearEnd = new Date("2026-06-22");
+          
+          schoolDaysOff = schoolDaysOff.split(", ");
+          schoolDaysOff = schoolDaysOff.map(dateStr => {
+            const [month, day, year] = dateStr.trim().split("-");
+            return new Date(year, month - 1, day);
+          })
+          let dayCounter = 0; 
+          for (let i = schoolYearStart; i < today; i += 86400000) { // yes i know this is really clunky and bad but idgaf it works and i dont want to make it better
+            if (i.getDay() == 6 || i.getDay() == 0 || schoolDaysOff.includes(i)) {
+              continue;
+            } else {
+              dayCounter += 1;
+            }
+          }
+          let dayLetter = dayCounter % 2 == 0 ? "a day" : "b day";
+          if (today == schoolYearStart) {
+            dayLetter = "c day";
+          } 
+          if (today == schoolYearEnd) {
+            dayLetter = "d day";
+          }
+
+          document.getElementById("dayLetter").textContent = dayLetter;
+          
+        } catch (e) {
+          console.error("error fetching meals:", e);
+        }
+      }
+
+      main();
+    </script>
+  </body>
+</html>
