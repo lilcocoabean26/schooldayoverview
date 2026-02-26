@@ -150,8 +150,8 @@
              document.getElementById("mealsContainer").innerHTML = "";
           }
 
-          document.getElementById("previous").href = `/?addeddays=${additionalDays - 1}`;
-          document.getElementById("next").href = `/?addeddays=${additionalDays + 1}`;
+          document.getElementById("previous").href = `/schooldayoverview?addeddays=${additionalDays - 1}`;
+          document.getElementById("next").href = `/schooldayoverview?addeddays=${additionalDays + 1}`;
         } catch (e) {
           console.error("error fetching meals:", e);
         }
