@@ -28,23 +28,41 @@
       p {
         font-size: 20px;
       }
+      a:link, a:visited {
+        color: #0ff;
+      }
     </style>
   </head>
   <body>
     <h1 class="title">school day overview</h1>
     <h1>date</h1>
     <p id="date">loading...</p>
-    <p id="dayLetter">loading...</p>
-    <h1>meals</h1>
-    <h2>breakfast</h2>
-    <p id="breakfast">loading...</p>
-    <h2>lunch</h2>
-    <p id="lunch">loading...</p>
+    <div id="schoolInContentContainer">
+      <p id="dayLetter">loading...</p>
+      <div id="mealsContainer">
+        <h1>meals</h1>
+        <div id="breakfastContainer">
+          <h2>breakfast</h2>
+          <p id="breakfast">loading...</p>
+        </div>
+        <div id="lunchContainer">
+          <h2>lunch</h2>
+          <p id="lunch">loading...</p>
+        </div>
+      </div>
+    </div>
+    <p><a id="previous" href="/">Previous</a>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<a id="next" href="/">Next</a></p>
     
     <script type="module">
       async function main() {
-        const today = new Date();
-        const date = today.toDateString();
+        const additionalDays = Number(new URLSearchParams(window.location.search).get('addeddays'));
+        if (isNaN(additionalDays)) {
+          location.replace('/');
+        }
+        let dayChecking = new Date();
+        dayChecking.setHours(0, 0, 0, 0);
+        dayChecking.setDate(dayChecking.getDate() + additionalDays);
+        const date = dayChecking.toDateString();
         document.getElementById("date").innerHTML = date.toLowerCase();
 
         const apiLinkWithPlaceholders = "https://api.mealviewer.com/api/v4/school/O%27CallaghanMikeMSi3LearnAcademy/!d/!d";
@@ -53,7 +71,7 @@
             month: '2-digit',
             day: '2-digit'
         };
-        const formattedDate = today.toISOString().split('T')[0]
+        const formattedDate = dayChecking.toLocaleDateString('en-US', options).replace(/\//g, '-')
         const apiLink = apiLinkWithPlaceholders.replace(/!d/g, formattedDate);
 
         try {
@@ -92,38 +110,52 @@
           document.getElementById("breakfast").innerHTML = breakfast.toLowerCase();
           document.getElementById("lunch").innerHTML = lunch.toLowerCase();
           
-          let schoolDaysOff = "09-01-2025, 09-15-2025, 10-17-2025, 10-31-2025, 11-11-2025, 11-26-2025, 11-27-2025, 11-28-2025, 12-22-2025, 12-23-2025, 12-24-2025, 12-25-2025, 12-26-2025, 12-29-2025, 12-30-2025, 12-31-2025, 1-1-2026,1-2-2026, 1-19-2026, 1-26-2026, 02-09-2026, 02-16-2026, 03-16-2026,03-17-2026, 03-18-2026, 03-19-2026, 03-20-2026, 04-03-2026, 04-06-2026";
-          const schoolYearStart = new Date("2025-08-11");
-          const schoolYearEnd = new Date("2026-06-22");
+          let schoolDaysOff = "09-01-2025, 09-15-2025, 10-17-2025, 10-31-2025, 11-11-2025, 11-26-2025, 11-27-2025, 11-28-2025, 12-22-2025, 12-23-2025, 12-24-2025, 12-25-2025, 12-26-2025, 12-29-2025, 12-30-2025, 12-31-2025, 1-1-2026, 1-2-2026, 1-19-2026, 1-26-2026, 02-09-2026, 02-16-2026, 03-16-2026, 03-17-2026, 03-18-2026, 03-19-2026, 03-20-2026, 04-03-2026, 04-06-2026";
+          const schoolYearStart = new Date(2025, 7, 11); // august 11 2025
+          const schoolYearEnd = new Date(2026, 4, 22);   // may 22 2026
           
           schoolDaysOff = schoolDaysOff.split(", ");
           schoolDaysOff = schoolDaysOff.map(dateStr => {
             const [month, day, year] = dateStr.trim().split("-");
-            return new Date(year, month - 1, day);
+            return new Date(year, month - 1, day) + 0;
           })
           let dayCounter = 0; 
-          for (let i = schoolYearStart; i < today; i += 86400000) { // yes i know this is really clunky and bad but idgaf it works and i dont want to make it better
-            if (i.getDay() == 6 || i.getDay() == 0 || schoolDaysOff.includes(i)) {
+          for (let i = new Date(schoolYearStart); i < dayChecking; i.setDate(i.getDate() + 1)) { // yes i know this is really clunky and bad but idgaf it works and i dont want to make it better
+            if (i.getDay() == 6 || i.getDay() == 0 || schoolDaysOff.includes(i + 0)) {
               continue;
             } else {
               dayCounter += 1;
             }
           }
           let dayLetter = dayCounter % 2 == 0 ? "a day" : "b day";
-          if (today == schoolYearStart) {
+          if (dayChecking.getTime() === schoolYearStart.getTime()) {
             dayLetter = "c day";
-          } 
-          if (today == schoolYearEnd) {
+          }
+          if (dayChecking.getTime() === schoolYearEnd.getTime()) {
             dayLetter = "d day";
           }
-
           document.getElementById("dayLetter").textContent = dayLetter;
-          
+
+          if (dayChecking < schoolYearStart || dayChecking > schoolYearEnd || schoolDaysOff.includes(dayChecking + 0) || dayChecking.getDay() == 6 || dayChecking.getDay() == 0) {
+            document.getElementById("schoolInContentContainer").innerHTML = "<p>no school today</p>";
+          }
+
+          if (breakfast == null || breakfast == "") {
+            document.getElementById("breakfastContainer").innerHTML = "";
+          }
+          if (lunch == null || lunch == "") {
+            document.getElementById("lunchContainer").innerHTML = "";
+          }
+          if ((breakfast == null || breakfast == "") && (lunch == null || lunch == "")) {
+             document.getElementById("mealsContainer").innerHTML = "";
+          }
+
+          document.getElementById("previous").href = `/?addeddays=${additionalDays - 1}`;
+          document.getElementById("next").href = `/?addeddays=${additionalDays + 1}`;
         } catch (e) {
           console.error("error fetching meals:", e);
         }
       }
-
       main();
     </script>
   </body>
