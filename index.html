@@ -64,6 +64,9 @@
         dayChecking.setDate(dayChecking.getDate() + additionalDays);
         const date = dayChecking.toDateString();
         document.getElementById("date").innerHTML = date.toLowerCase();
+        
+        document.getElementById("previous").href = `/schooldayoverview?addeddays=${additionalDays - 1}`;
+        document.getElementById("next").href = `/schooldayoverview?addeddays=${additionalDays + 1}`;
 
         const apiLinkWithPlaceholders = "https://api.mealviewer.com/api/v4/school/O%27CallaghanMikeMSi3LearnAcademy/!d/!d";
         const options = {
@@ -150,8 +153,6 @@
              document.getElementById("mealsContainer").innerHTML = "";
           }
 
-          document.getElementById("previous").href = `/schooldayoverview?addeddays=${additionalDays - 1}`;
-          document.getElementById("next").href = `/schooldayoverview?addeddays=${additionalDays + 1}`;
         } catch (e) {
           console.error("error fetching meals:", e);
         }
