@@ -57,7 +57,7 @@
       async function main() {
         const additionalDays = Number(new URLSearchParams(window.location.search).get('addeddays'));
         if (isNaN(additionalDays)) {
-          location.replace('/');
+          location.replace('./');
         }
         let dayChecking = new Date();
         dayChecking.setHours(0, 0, 0, 0);
