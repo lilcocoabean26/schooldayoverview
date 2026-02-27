@@ -65,8 +65,8 @@
         const date = dayChecking.toDateString();
         document.getElementById("date").innerHTML = date.toLowerCase();
         
-        document.getElementById("previous").href = `/schooldayoverview?addeddays=${additionalDays - 1}`;
-        document.getElementById("next").href = `/schooldayoverview?addeddays=${additionalDays + 1}`;
+        document.getElementById("previous").href = `./?addeddays=${additionalDays - 1}`;
+        document.getElementById("next").href = `./?addeddays=${additionalDays + 1}`;
 
         const apiLinkWithPlaceholders = "https://api.mealviewer.com/api/v4/school/O%27CallaghanMikeMSi3LearnAcademy/!d/!d";
         const options = {
