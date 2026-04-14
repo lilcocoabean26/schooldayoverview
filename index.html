@@ -1,4 +1,4 @@
-<!--if its not the 2025-2026 school year and the program is reporting the a/b day wrong, edit lines 116 to 118 in the script tag-->
+<!--if its not the 2025-2026 school year and the program is reporting the a/b day wrong, edit lines 123 to 125 in the script tag-->
 
 <!DOCTYPE html>
 <html>
@@ -31,28 +31,35 @@
       a:link, a:visited {
         color: #0ff;
       }
+      #main {
+        display: none;
+      }
     </style>
   </head>
   <body>
-    <h1 class="title">school day overview</h1>
-    <h1>date</h1>
-    <p id="date">loading...</p>
-    <div id="schoolInContentContainer">
-      <p id="dayLetter">loading...</p>
-      <div id="mealsContainer">
-        <h1>meals</h1>
-        <div id="breakfastContainer">
-          <h2>breakfast</h2>
-          <p id="breakfast">loading...</p>
-        </div>
-        <div id="lunchContainer">
-          <h2>lunch</h2>
-          <p id="lunch">loading...</p>
+    <div id="main">
+      <h1 class="title">school day overview</h1>
+      <h1>date</h1>
+      <p id="date">loading...</p>
+      <div id="schoolInContentContainer">
+        <p id="dayLetter">loading...</p>
+        <div id="mealsContainer">
+          <h1>meals</h1>
+          <div id="breakfastContainer">
+            <h2>breakfast</h2>
+            <p id="breakfast">loading...</p>
+          </div>
+          <div id="lunchContainer">
+            <h2>lunch</h2>
+            <p id="lunch">loading...</p>
+          </div>
         </div>
       </div>
+      <p><a id="previous" href="javascript:void(0);">Previous</a>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<a id="next" href="javascript:void(0);">Next</a></p>
     </div>
-    <p><a id="previous" href="javascript:void(0);">Previous</a>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<a id="next" href="javascript:void(0);">Next</a></p>
-    
+    <script> // show main content if js is enabled
+      document.getElementById("main").style.display = "block";
+    </script>
     <script type="module">
       async function main() {
         const additionalDays = Number(new URLSearchParams(window.location.search).get('addeddays'));
@@ -133,9 +140,6 @@
           let dayLetter = dayCounter % 2 == 0 ? "a day" : "b day";
           if (dayChecking.getTime() === schoolYearStart.getTime()) {
             dayLetter = "c day";
-          }
-          if (dayChecking.getTime() === schoolYearEnd.getTime()) {
-            dayLetter = "d day";
           }
           document.getElementById("dayLetter").textContent = dayLetter;
 
