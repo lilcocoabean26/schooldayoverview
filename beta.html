@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>school day overview</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+        background-color: #333;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+      .title {
+        font-size: 50px;
+      }
+      .version {
+        font-size: 10px;
+      }
+      h1 {
+        color: #eee;
+        font-size: 40px;
+      }
+      h2 {
+        font-size: 25px;
+      }
+      p {
+        font-size: 20px;
+      }
+      a:link, a:visited {
+        color: #0ff;
+      }
+      #main {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main">
+      <h1 class="title">mealviewer checker</h1>
+      <input type="text" id="schoolIdInput" placeholder="enter mealviewer school identifier...">
+      <button id="submitButton">submit</button>
+      <h1>date</h1>
+      <p id="date">loading...</p>
+      <div id="schoolInContentContainer">
+        <div id="mealsContainer">
+          <h1>meals</h1>
+          <div id="breakfastContainer">
+            <h2>breakfast</h2>
+            <p id="breakfast">loading...</p>
+          </div>
+          <div id="lunchContainer">
+            <h2>lunch</h2>
+            <p id="lunch">loading...</p>
+          </div>
+        </div>
+      </div>
+      <p><a id="previous" href="javascript:void(0);">Previous</a>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<a id="next" href="javascript:void(0);">Next</a></p>
+      <h6>this software will be repurposed on may 15th, 2026, and will then be released into the public domain</h6>
+    </div>
+    <script> // show main content if js is enabled
+      document.getElementById("main").style.display = "block";
+    </script>
+    <script type="module">
+      document.getElementById("submitButton").addEventListener("click", main);
+      async function main() {
+        const additionalDays = Number(new URLSearchParams(window.location.search).get('addeddays'));
+        if (isNaN(additionalDays)) {
+          location.replace('./');
+        }
+        let dayChecking = new Date();
+        dayChecking.setHours(0, 0, 0, 0);
+        dayChecking.setDate(dayChecking.getDate() + additionalDays);
+        const date = dayChecking.toDateString();
+        document.getElementById("date").innerHTML = date.toLowerCase();
+        
+        document.getElementById("previous").href = `./?addeddays=${additionalDays - 1}`;
+        document.getElementById("next").href = `./?addeddays=${additionalDays + 1}`;
+
+        const apiLinkWithPlaceholders = "https://api.mealviewer.com/api/v4/school/!s/!d/!d";
+        const options = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        };
+        const schoolIdentifier = document.getElementById("schoolIdInput").value;
+        const formattedDate = dayChecking.toLocaleDateString('en-US', options).replace(/\//g, '-')
+        const apiLink = apiLinkWithPlaceholders.replace(/!d/g, formattedDate).replace(/!s/g, schoolIdentifier);
+
+        try {
+          const response = await fetch(apiLink);
+          if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+          }
+
+          const jsonData = await response.text();
+          const jsonObj = JSON.parse(jsonData);
+
+          let breakfastJson = jsonObj.menuSchedules[0].menuBlocks[0];
+          let lunchJson = jsonObj.menuSchedules[0].menuBlocks[1];
+
+          function getAllValues(obj, key) {
+            let values = [];
+            function recurse(o) {
+              if (Array.isArray(o)) {
+                for (const item of o) recurse(item);
+              } else if (typeof o === 'object' && o !== null) {
+                for (const k in o) {
+                  if (k === key) values.push(o[k]);
+                  recurse(o[k]);
+                }
+              }
+            }
+            recurse(obj);
+            return values;
+          }
+
+          let breakfast = getAllValues(breakfastJson, "item_Name").join('<br>');
+          let lunch = getAllValues(lunchJson, "item_Name").join('<br>');
+
+          console.log(jsonData)
+          
+          document.getElementById("breakfast").innerHTML = breakfast.toLowerCase();
+          document.getElementById("lunch").innerHTML = lunch.toLowerCase();
+      
+          if (breakfast == null || breakfast == "") {
+            document.getElementById("breakfastContainer").innerHTML = "";
+          }
+          if (lunch == null || lunch == "") {
+            document.getElementById("lunchContainer").innerHTML = "";
+          }
+          if ((breakfast == null || breakfast == "") && (lunch == null || lunch == "")) {
+             document.getElementById("schoolInContentContainer").innerHTML = "no school today";
+          }
+
+        } catch (e) {
+          console.error("error fetching meals:", e);
+        }
+      }
+      main();
+    </script>
+    <noscript><h1 class="title">school day overview</h1><p>please enable javascript to use this site</p></noscript>
+  </body>
+</html>
