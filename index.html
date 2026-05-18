@@ -59,7 +59,7 @@
         </div>
       </div>
       <p><a id="previous" href="javascript:void(0);">Previous</a>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<a id="next" href="javascript:void(0);">Next</a></p>
-      <h6>this software will be repurposed on may 15th, 2026, and will then be released into the public domain</h6>
+      <!-- this software will be repurposed on may 15th, 2026, and will then be released into the public domain -->
     </div>
     <script> // show main content if js is enabled
       document.getElementById("main").style.display = "block";
@@ -140,11 +140,13 @@
             document.getElementById("lunchContainer").innerHTML = "";
           }
           if ((breakfast == null || breakfast == "") && (lunch == null || lunch == "")) {
-             document.getElementById("schoolInContentContainer").innerHTML = "no school today";
+            document.getElementById("schoolInContentContainer").innerHTML = "no school today";
           }
           document.getElementById("schoolInContentContainer").style.display = "block";
         } catch (e) {
           console.error("error fetching meals:", e);
+          document.getElementById("schoolInContentContainer").innerHTML = "error";
+          document.getElementById("schoolInContentContainer").style.display = "block";
         }
       }
       main();
